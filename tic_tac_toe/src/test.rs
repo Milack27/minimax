@@ -1,7 +1,10 @@
+use crate::GameResult::*;
+use crate::MoveError::*;
+use crate::Status::*;
 use crate::*;
 
 #[test]
-fn test_core() {
+fn test_tic_tac_toe() {
     let mut game = TicTacToe::new();
 
     assert_eq!(game.make_move(Player::One, Place::Center), Ok(()));
@@ -10,28 +13,21 @@ fn test_core() {
 
     assert_eq!(
         game.make_move(Player::One, Place::UpperRight),
-        Err(MoveError::WrongPlayer(Player::Two))
+        Err(WrongPlayer(Player::Two))
     );
 
     assert_eq!(
         game.make_move(Player::Two, Place::UpperLeft),
-        Err(MoveError::PlaceAlreadyUsed(Place::UpperLeft, Player::Two))
+        Err(PlaceAlreadyUsed(Place::UpperLeft, Player::Two))
     );
 
     assert_eq!(game.make_move(Player::Two, Place::Upper), Ok(()));
     assert_eq!(game.make_move(Player::One, Place::UpperRight), Ok(()));
 
-    assert_eq!(
-        game.get_status(),
-        Status::Finished(GameResult {
-            winner: Some(Player::One)
-        })
-    );
+    assert_eq!(game.get_status(), Finished(Win(Player::One)));
 
     assert_eq!(
         game.make_move(Player::Two, Place::LowerRight),
-        Err(MoveError::InvalidStatus(Status::Finished(GameResult {
-            winner: Some(Player::One)
-        })))
+        Err(InvalidStatus(Finished(Win(Player::One))))
     );
 }

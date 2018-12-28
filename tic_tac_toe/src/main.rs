@@ -116,7 +116,7 @@ fn main() {
                 println!("{}", game);
             }
             Status::Finished(result) => {
-                match result.winner {
+                match result.get_winner() {
                     None => println!("Draw."),
                     Some(Player::One) => println!("X wins."),
                     Some(Player::Two) => println!("O wins."),

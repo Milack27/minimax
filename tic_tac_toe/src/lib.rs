@@ -25,8 +25,9 @@ pub enum Player {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq)]
-pub struct GameResult {
-    pub winner: Option<Player>,
+pub enum GameResult {
+    Draw,
+    Win(Player),
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq)]
@@ -54,6 +55,22 @@ impl Player {
         match self {
             Player::One => Player::Two,
             Player::Two => Player::One,
+        }
+    }
+}
+
+impl GameResult {
+    pub fn from_winner(winner: Option<Player>) -> GameResult {
+        match winner {
+            None => GameResult::Draw,
+            Some(player) => GameResult::Win(player),
+        }
+    }
+
+    pub fn get_winner(self) -> Option<Player> {
+        match self {
+            GameResult::Draw => None,
+            GameResult::Win(player) => Some(player),
         }
     }
 }
@@ -147,7 +164,7 @@ impl TicTacToe {
         let all_filled = self.grid.iter().all(|p| p.is_some());
 
         if winner.is_some() || all_filled {
-            Some(GameResult { winner })
+            Some(GameResult::from_winner(winner))
         } else {
             None
         }
