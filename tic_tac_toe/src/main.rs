@@ -2,11 +2,6 @@ use std::io;
 
 use tic_tac_toe::*;
 
-enum Command {
-    Move(Place),
-    Revert(Place),
-}
-
 enum TicTacToeError {
     MoveError(MoveError),
     InvalidInput(String),
@@ -18,26 +13,17 @@ impl From<MoveError> for TicTacToeError {
     }
 }
 
-fn parse_input(input: String) -> Result<Command, TicTacToeError> {
+fn parse_input(input: String) -> Result<Place, TicTacToeError> {
     match input.as_str() {
-        "Q" => Ok(Command::Move(Place::UpperLeft)),
-        "W" => Ok(Command::Move(Place::Upper)),
-        "E" => Ok(Command::Move(Place::UpperRight)),
-        "A" => Ok(Command::Move(Place::Left)),
-        "S" => Ok(Command::Move(Place::Center)),
-        "D" => Ok(Command::Move(Place::Right)),
-        "Z" => Ok(Command::Move(Place::LowerLeft)),
-        "X" => Ok(Command::Move(Place::Lower)),
-        "C" => Ok(Command::Move(Place::LowerRight)),
-        "RQ" => Ok(Command::Revert(Place::UpperLeft)),
-        "RW" => Ok(Command::Revert(Place::Upper)),
-        "RE" => Ok(Command::Revert(Place::UpperRight)),
-        "RA" => Ok(Command::Revert(Place::Left)),
-        "RS" => Ok(Command::Revert(Place::Center)),
-        "RD" => Ok(Command::Revert(Place::Right)),
-        "RZ" => Ok(Command::Revert(Place::LowerLeft)),
-        "RX" => Ok(Command::Revert(Place::Lower)),
-        "RC" => Ok(Command::Revert(Place::LowerRight)),
+        "Q" => Ok(Place::UpperLeft),
+        "W" => Ok(Place::Upper),
+        "E" => Ok(Place::UpperRight),
+        "A" => Ok(Place::Left),
+        "S" => Ok(Place::Center),
+        "D" => Ok(Place::Right),
+        "Z" => Ok(Place::LowerLeft),
+        "X" => Ok(Place::Lower),
+        "C" => Ok(Place::LowerRight),
         _ => Err(TicTacToeError::InvalidInput(input)),
     }
 }
@@ -55,13 +41,9 @@ fn handle_turn(game: &mut TicTacToe, player: Player) -> Result<(), TicTacToeErro
         buffer.trim().to_uppercase()
     };
 
-    let command = parse_input(input)?;
+    let place = parse_input(input)?;
 
-    match command {
-        Command::Move(place) => game.make_move(player, place)?,
-        Command::Revert(place) => game.revert_move(game[place].unwrap_or(player), place)?,
-    }
-
+    game.make_move(player, place)?;
     Ok(())
 }
 
@@ -75,9 +57,6 @@ fn handle_error(error: TicTacToeError) {
         }
         TicTacToeError::MoveError(MoveError::PlaceAlreadyUsed(_, _)) => {
             println!("Cannot make that move because that place is already used.");
-        }
-        TicTacToeError::MoveError(MoveError::EmptyPlace(_)) => {
-            println!("Cannot revert that move because that place is empty.");
         }
         TicTacToeError::InvalidInput(input) => {
             println!("Invalid input: {}", input);

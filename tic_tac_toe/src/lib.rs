@@ -5,6 +5,8 @@ mod display;
 #[cfg(test)]
 mod test;
 
+const GRID_SIZE: usize = 9;
+
 #[derive(Clone, Copy, Debug, Hash, PartialEq)]
 pub enum Place {
     UpperLeft,
@@ -39,7 +41,7 @@ pub enum Status {
 #[derive(Clone, Debug, Hash, PartialEq)]
 pub struct TicTacToe {
     status: Status,
-    grid: [Option<Player>; 9],
+    grid: [Option<Player>; GRID_SIZE],
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq)]
@@ -47,7 +49,6 @@ pub enum MoveError {
     InvalidStatus(Status),
     WrongPlayer(Player),
     PlaceAlreadyUsed(Place, Player),
-    EmptyPlace(Place),
 }
 
 impl Player {
@@ -79,7 +80,7 @@ impl TicTacToe {
     pub fn new() -> TicTacToe {
         TicTacToe {
             status: Status::Running(Player::One),
-            grid: [None, None, None, None, None, None, None, None, None],
+            grid: [None; GRID_SIZE],
         }
     }
 
@@ -186,27 +187,6 @@ impl TicTacToe {
                     Status::Finished(result)
                 } else {
                     Status::Running(player.other())
-                };
-
-                Ok(())
-            }
-        }
-    }
-
-    pub fn revert_move(&mut self, player: Player, place: Place) -> Result<(), MoveError> {
-        match self[place] {
-            None => Err(MoveError::EmptyPlace(place)),
-            Some(place_player) => {
-                if player != place_player {
-                    return Err(MoveError::WrongPlayer(place_player));
-                }
-
-                self.set_place(place, None);
-
-                self.status = if let Some(result) = self.check_win() {
-                    Status::Finished(result)
-                } else {
-                    Status::Running(player)
                 };
 
                 Ok(())
