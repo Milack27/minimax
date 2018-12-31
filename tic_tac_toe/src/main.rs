@@ -13,6 +13,21 @@ impl From<MoveError> for TicTacToeError {
     }
 }
 
+fn print_instructions() {
+    println!("-----------------------------");
+    println!("         TIC TAC TOE         ");
+    println!("-----------------------------");
+    println!();
+    println!("Press the following keys and ENTER to fill the blank places:");
+    println!();
+    println!(" Q | W | E ");
+    println!("---+---+---");
+    println!(" A | S | D ");
+    println!("---+---+---");
+    println!(" Z | X | C ");
+    println!();
+}
+
 fn parse_input(input: String) -> Result<Place, TicTacToeError> {
     match input.as_str() {
         "Q" => Ok(Place::UpperLeft),
@@ -68,18 +83,7 @@ fn handle_error(error: TicTacToeError) {
 }
 
 fn main() {
-    println!("-----------------------------");
-    println!("         TIC TAC TOE         ");
-    println!("-----------------------------");
-    println!();
-    println!("Press the following keys and ENTER to fill the blank places:");
-    println!();
-    println!(" Q | W | E ");
-    println!("---+---+---");
-    println!(" A | S | D ");
-    println!("---+---+---");
-    println!(" Z | X | C ");
-    println!();
+    print_instructions();
 
     let mut game = TicTacToe::new();
 
