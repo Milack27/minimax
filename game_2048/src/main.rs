@@ -1,6 +1,12 @@
+use ::minimax::{ GameState, MinimaxError };
+
 use std::io;
 
 use game_2048::*;
+
+use game_2048::Player::*;
+use game_2048::Direction::*;
+use game_2048::MoveError::*;
 
 enum Game2048Error {
     MoveError(MoveError),
@@ -41,12 +47,62 @@ fn print_instructions() {
     println!();
 }
 
+fn print_minimax(game: &Game2048) -> Result<(), MinimaxError<Game2048>> {
+    const MINIMAX_DEPTH: usize = 5;
+
+    println!("Minimax:");
+
+    let moves = match game.minimax(MINIMAX_DEPTH) {
+        Ok(moves) => moves,
+        Err(error) => {
+            println!("{:?}\n", error);
+            return Err(error);
+        }
+    };
+    
+    for mov in moves {
+        match mov {
+            Move::Human(Up) => println!("W"),
+            Move::Human(Left) => println!("A"),
+            Move::Human(Down) => println!("S"),
+            Move::Human(Right) => println!("D"),
+
+            Move::Robot(place, value) => match place.get_xy() {
+                (0, 0) => println!("Z, {}", value),
+                (1, 0) => println!("X, {}", value),
+                (2, 0) => println!("C, {}", value),
+                (3, 0) => println!("V, {}", value),
+
+                (0, 1) => println!("A, {}", value),
+                (1, 1) => println!("S, {}", value),
+                (2, 1) => println!("D, {}", value),
+                (3, 1) => println!("F, {}", value),
+
+                (0, 2) => println!("Q, {}", value),
+                (1, 2) => println!("W, {}", value),
+                (2, 2) => println!("E, {}", value),
+                (3, 2) => println!("R, {}", value),
+
+                (0, 3) => println!("1, {}", value),
+                (1, 3) => println!("2, {}", value),
+                (2, 3) => println!("3, {}", value),
+                (3, 3) => println!("4, {}", value),
+
+                _ => println!("(unknown)"),
+            }
+        };
+    }
+
+    println!();
+    Ok(())
+}
+
 fn handle_human_turn(game: &mut Game2048, input: String) -> Result<(), Game2048Error> {
     let direction = match input.as_str() {
-        "W" => Ok(Direction::Up),
-        "A" => Ok(Direction::Left),
-        "S" => Ok(Direction::Down),
-        "D" => Ok(Direction::Right),
+        "W" => Ok(Up),
+        "A" => Ok(Left),
+        "S" => Ok(Down),
+        "D" => Ok(Right),
         _ => Err(Game2048Error::InvalidInput(input)),
     }?;
 
@@ -96,21 +152,21 @@ fn handle_robot_turn(game: &mut Game2048, input: String) -> Result<(), Game2048E
 
 fn handle_error(error: Game2048Error) {
     match error {
-        Game2048Error::MoveError(MoveError::InvalidStatus(_)) => {
+        Game2048Error::MoveError(InvalidStatus(_)) => {
             panic!("Cannot make any move now because the status of the game doesn't allow it.");
         }
-        Game2048Error::MoveError(MoveError::WrongPlayer(_)) => {
+        Game2048Error::MoveError(WrongPlayer(_)) => {
             panic!("Cannot make that move because it's not the player's turn.");
         }
-        Game2048Error::MoveError(MoveError::PlaceAlreadyFilled(_)) => {
+        Game2048Error::MoveError(PlaceAlreadyFilled(_)) => {
             println!("Cannot make that move because that place is already used.");
         }
-        Game2048Error::MoveError(MoveError::ValueNotAllowed(_)) => {
+        Game2048Error::MoveError(ValueNotAllowed(_)) => {
             println!(
                 "Cannot make that move because the given value is not allowed. Use only 2 or 4."
             );
         }
-        Game2048Error::MoveError(MoveError::DirectionBlocked(_)) => {
+        Game2048Error::MoveError(DirectionBlocked(_)) => {
             println!("Cannot make that move because the given direction is blocked.");
         }
         Game2048Error::InvalidInput(input) => {
@@ -127,6 +183,8 @@ fn main() {
     let mut game = Game2048::new();
 
     while let Status::Running(player) = game.get_status() {
+        print_minimax(&game).ok();
+
         let input = {
             let mut buffer = String::new();
 
@@ -140,8 +198,8 @@ fn main() {
         };
 
         let result = match player {
-            Player::Human => handle_human_turn(&mut game, input),
-            Player::Robot => handle_robot_turn(&mut game, input),
+            Human => handle_human_turn(&mut game, input),
+            Robot => handle_robot_turn(&mut game, input),
         };
 
         if let Err(error) = result {

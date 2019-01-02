@@ -28,9 +28,12 @@ pub trait GameState: Clone {
     type MoveError;
 
     fn get_status(&self) -> Status;
-    fn get_score(&self) -> isize;
     fn possible_moves(&self) -> Vec<Self::Move>;
     fn make_move(&mut self, mov: &Self::Move) -> Result<(), Self::MoveError>;
+
+    fn get_score(&self) -> isize {
+        0
+    }
 
     fn minimax(&self, depth: usize) -> Result<Vec<Self::Move>, MinimaxError<Self>> {
         Ok(minimax(self, depth)?.1)

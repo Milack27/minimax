@@ -69,10 +69,6 @@ impl GameState for TicTacToe {
         self.get_status().into()
     }
 
-    fn get_score(&self) -> isize {
-        0
-    }
-
     fn possible_moves(&self) -> Vec<Place> {
         self.possible_moves()
     }

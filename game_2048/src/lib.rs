@@ -1,4 +1,7 @@
+#![feature(try_from)]
+
 mod display;
+mod minimax;
 
 #[cfg(test)]
 mod test;
