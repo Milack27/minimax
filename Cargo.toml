@@ -1,5 +1,5 @@
 [package]
-name = "game_2p"
+name = "minimax"
 version = "0.1.0"
 authors = ["André Vicente Milack <andrevicente.m@gmail.com>"]
 edition = "2018"
