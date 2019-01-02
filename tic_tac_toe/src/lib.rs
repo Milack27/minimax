@@ -1,6 +1,7 @@
 use std::ops::Index;
 
 mod display;
+mod minimax;
 
 #[cfg(test)]
 mod test;
@@ -60,19 +61,27 @@ impl Player {
     }
 }
 
-impl GameResult {
-    pub fn from_winner(winner: Option<Player>) -> GameResult {
+impl From<GameResult> for Option<Player> {
+    fn from(result: GameResult) -> Option<Player> {
+        match result {
+            GameResult::Draw => None,
+            GameResult::Win(player) => Some(player),
+        }
+    }
+}
+
+impl From<Option<Player>> for GameResult {
+    fn from(winner: Option<Player>) -> GameResult {
         match winner {
             None => GameResult::Draw,
             Some(player) => GameResult::Win(player),
         }
     }
+}
 
-    pub fn get_winner(self) -> Option<Player> {
-        match self {
-            GameResult::Draw => None,
-            GameResult::Win(player) => Some(player),
-        }
+impl GameResult {
+    pub fn winner(self) -> Option<Player> {
+        self.into()
     }
 }
 
@@ -132,7 +141,10 @@ impl TicTacToe {
                 .iter()
                 .cloned()
                 .enumerate()
-                .filter_map(|t| t.1.map(|_| TicTacToe::get_grid_place(t.0)))
+                .filter_map(|(i, p)| match p {
+                    None => Some(TicTacToe::get_grid_place(i)),
+                    Some(_) => None,
+                })
                 .collect(),
             Status::Finished(_) => Vec::new(),
         }
@@ -165,7 +177,7 @@ impl TicTacToe {
         let all_filled = self.grid.iter().all(|p| p.is_some());
 
         if winner.is_some() || all_filled {
-            Some(GameResult::from_winner(winner))
+            Some(GameResult::from(winner))
         } else {
             None
         }

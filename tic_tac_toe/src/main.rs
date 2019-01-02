@@ -1,6 +1,13 @@
+use ::minimax::{ GameState, MinimaxError };
+
 use std::io;
 
 use tic_tac_toe::*;
+
+use tic_tac_toe::Place::*;
+use tic_tac_toe::GameResult::*;
+use tic_tac_toe::Status::*;
+use tic_tac_toe::MoveError::*;
 
 enum TicTacToeError {
     MoveError(MoveError),
@@ -28,17 +35,52 @@ fn print_instructions() {
     println!();
 }
 
+fn print_minimax(game: &TicTacToe) -> Result<(), MinimaxError<TicTacToe>> {
+    const MINIMAX_DEPTH: usize = 5;
+
+    print!("Minimax: ");
+
+    let places = match game.minimax(MINIMAX_DEPTH) {
+        Ok(places) => places,
+        Err(error) => {
+            println!("{:?}\n", error);
+            return Err(error);
+        }
+    };
+    
+    for (i, place) in places.iter().enumerate() {
+        print!("{}", match place {
+            UpperLeft => "Q",
+            Upper => "W",
+            UpperRight => "E",
+            Left => "A",
+            Center => "S",
+            Right => "D",
+            LowerLeft => "Z",
+            Lower => "X",
+            LowerRight => "C",
+        });
+
+        if i < places.len() {
+            print!(", ");
+        }
+    }
+
+    println!("\n");
+    Ok(())
+}
+
 fn parse_input(input: String) -> Result<Place, TicTacToeError> {
     match input.as_str() {
-        "Q" => Ok(Place::UpperLeft),
-        "W" => Ok(Place::Upper),
-        "E" => Ok(Place::UpperRight),
-        "A" => Ok(Place::Left),
-        "S" => Ok(Place::Center),
-        "D" => Ok(Place::Right),
-        "Z" => Ok(Place::LowerLeft),
-        "X" => Ok(Place::Lower),
-        "C" => Ok(Place::LowerRight),
+        "Q" => Ok(UpperLeft),
+        "W" => Ok(Upper),
+        "E" => Ok(UpperRight),
+        "A" => Ok(Left),
+        "S" => Ok(Center),
+        "D" => Ok(Right),
+        "Z" => Ok(LowerLeft),
+        "X" => Ok(Lower),
+        "C" => Ok(LowerRight),
         _ => Err(TicTacToeError::InvalidInput(input)),
     }
 }
@@ -64,13 +106,13 @@ fn handle_turn(game: &mut TicTacToe, player: Player) -> Result<(), TicTacToeErro
 
 fn handle_error(error: TicTacToeError) {
     match error {
-        TicTacToeError::MoveError(MoveError::InvalidStatus(_)) => {
+        TicTacToeError::MoveError(InvalidStatus(_)) => {
             panic!("Cannot make any move now because the status of the game doesn't allow it.");
         }
-        TicTacToeError::MoveError(MoveError::WrongPlayer(_)) => {
+        TicTacToeError::MoveError(WrongPlayer(_)) => {
             panic!("Cannot make that move because it's not the player's turn.");
         }
-        TicTacToeError::MoveError(MoveError::PlaceAlreadyUsed(_, _)) => {
+        TicTacToeError::MoveError(PlaceAlreadyUsed(_, _)) => {
             println!("Cannot make that move because that place is already used.");
         }
         TicTacToeError::InvalidInput(input) => {
@@ -89,7 +131,9 @@ fn main() {
 
     loop {
         match game.get_status() {
-            Status::Running(player) => {
+            Running(player) => {
+                print_minimax(&game).ok();
+
                 let result = handle_turn(&mut game, player);
 
                 if let Err(error) = result {
@@ -98,11 +142,11 @@ fn main() {
 
                 println!("{}", game);
             }
-            Status::Finished(result) => {
-                match result.get_winner() {
-                    None => println!("Draw."),
-                    Some(Player::One) => println!("X wins."),
-                    Some(Player::Two) => println!("O wins."),
+            Finished(result) => {
+                match result {
+                    Draw => println!("Draw."),
+                    Win(Player::One) => println!("X wins."),
+                    Win(Player::Two) => println!("O wins."),
                 }
 
                 break;
