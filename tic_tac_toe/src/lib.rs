@@ -7,7 +7,7 @@ mod test;
 
 const GRID_SIZE: usize = 9;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum Place {
     UpperLeft,
     Upper,
@@ -20,31 +20,31 @@ pub enum Place {
     LowerRight,
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum Player {
     One,
     Two,
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum GameResult {
     Draw,
     Win(Player),
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum Status {
     Running(Player),
     Finished(GameResult),
 }
 
-#[derive(Clone, Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct TicTacToe {
     status: Status,
     grid: [Option<Player>; GRID_SIZE],
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum MoveError {
     InvalidStatus(Status),
     WrongPlayer(Player),

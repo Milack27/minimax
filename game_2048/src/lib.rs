@@ -11,19 +11,19 @@ const GRID_WIDTH: usize = 4;
 const GRID_HEIGHT: usize = 4;
 const GRID_SIZE: usize = GRID_WIDTH * GRID_HEIGHT;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct Place(usize);
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct InvalidPlace;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum Player {
     Human,
     Robot,
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum Direction {
     Up,
     Down,
@@ -31,25 +31,25 @@ pub enum Direction {
     Right,
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum Move {
     Human(Direction),
     Robot(Place, usize),
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum Status {
     Running(Player),
     Finished,
 }
 
-#[derive(Clone, Debug, Hash, PartialEq)]
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
 pub struct Game2048 {
     status: Status,
     grid: [usize; GRID_SIZE],
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum MoveError {
     InvalidStatus(Status),
     WrongPlayer(Player),
