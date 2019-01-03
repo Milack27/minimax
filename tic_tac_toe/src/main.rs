@@ -1,13 +1,13 @@
-use ::minimax::{ GameState, MinimaxError };
+use ::minimax::{GameState, MinimaxError};
 
 use std::io;
 
 use tic_tac_toe::*;
 
-use tic_tac_toe::Place::*;
 use tic_tac_toe::GameResult::*;
-use tic_tac_toe::Status::*;
 use tic_tac_toe::MoveError::*;
+use tic_tac_toe::Place::*;
+use tic_tac_toe::Status::*;
 
 enum TicTacToeError {
     MoveError(MoveError),
@@ -47,19 +47,22 @@ fn print_minimax(game: &TicTacToe) -> Result<(), MinimaxError<TicTacToe>> {
             return Err(error);
         }
     };
-    
+
     for (i, place) in places.iter().enumerate() {
-        print!("{}", match place {
-            UpperLeft => "Q",
-            Upper => "W",
-            UpperRight => "E",
-            Left => "A",
-            Center => "S",
-            Right => "D",
-            LowerLeft => "Z",
-            Lower => "X",
-            LowerRight => "C",
-        });
+        print!(
+            "{}",
+            match place {
+                UpperLeft => "Q",
+                Upper => "W",
+                UpperRight => "E",
+                Left => "A",
+                Center => "S",
+                Right => "D",
+                LowerLeft => "Z",
+                Lower => "X",
+                LowerRight => "C",
+            }
+        );
 
         if i < places.len() {
             print!(", ");

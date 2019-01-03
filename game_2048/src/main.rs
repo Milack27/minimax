@@ -1,12 +1,12 @@
-use ::minimax::{ GameState, MinimaxError };
+use ::minimax::{GameState, MinimaxError};
 
 use std::io;
 
 use game_2048::*;
 
-use game_2048::Player::*;
 use game_2048::Direction::*;
 use game_2048::MoveError::*;
+use game_2048::Player::*;
 
 enum Game2048Error {
     MoveError(MoveError),
@@ -59,7 +59,7 @@ fn print_minimax(game: &Game2048) -> Result<(), MinimaxError<Game2048>> {
             return Err(error);
         }
     };
-    
+
     for mov in moves {
         match mov {
             Move::Human(Up) => println!("W"),
@@ -89,7 +89,7 @@ fn print_minimax(game: &Game2048) -> Result<(), MinimaxError<Game2048>> {
                 (3, 3) => println!("4, {}", value),
 
                 _ => println!("(unknown)"),
-            }
+            },
         };
     }
 

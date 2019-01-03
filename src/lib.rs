@@ -49,7 +49,7 @@ pub enum MinimaxError<S: GameState> {
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 enum Outcome {
-    Definite(GameResult),
+    Definite(GameResult, usize),
     Indefinite(isize),
 }
 
@@ -84,8 +84,19 @@ fn compare_outcome(player: Player, lhs: &Outcome, rhs: &Outcome) -> Ordering {
     let greater_if = |b| if b { Ordering::Greater } else { Ordering::Less };
 
     match (lhs, rhs) {
-        (Definite(Win(winner)), _) => greater_if(*winner == player),
-        (Definite(Draw), Indefinite(score)) => greater_if(normalize(score).is_negative()),
+        (Definite(Win(lhs_winner), lhs_moves), Definite(Win(rhs_winner), rhs_moves))
+            if (*lhs_winner, *rhs_winner) == (player, player) =>
+        {
+            lhs_moves.cmp(rhs_moves).reverse()
+        }
+        (Definite(Win(lhs_winner), lhs_moves), Definite(Win(rhs_winner), rhs_moves))
+            if (*lhs_winner, *rhs_winner) == (player.other(), player.other()) =>
+        {
+            lhs_moves.cmp(rhs_moves)
+        }
+        (Definite(Win(winner), _), _) => greater_if(*winner == player),
+        (Definite(Draw, lhs_moves), Definite(Draw, rhs_moves)) => lhs_moves.cmp(rhs_moves),
+        (Definite(Draw, _), Indefinite(score)) => greater_if(normalize(score).is_negative()),
         (Indefinite(lhs_score), Indefinite(rhs_score)) => {
             normalize(lhs_score).cmp(&normalize(rhs_score))
         }
@@ -113,9 +124,16 @@ fn minimax<S: GameState>(
                 .map_err(MinimaxError::MoveError)?;
 
             let outcome = match child_state.get_status() {
-                Status::Finished(result) => Definite(result),
+                Status::Finished(result) => Definite(result, 0),
                 Status::Running(_) if depth == 0 => Indefinite(child_state.get_score()),
-                _ => minimax(&child_state, depth - 1)?.0,
+                _ => {
+                    let child_outcome = minimax(&child_state, depth - 1)?.0;
+
+                    match child_outcome {
+                        Definite(result, moves) => Definite(result, moves + 1),
+                        _ => child_outcome,
+                    }
+                }
             };
 
             Ok((mov, outcome))
