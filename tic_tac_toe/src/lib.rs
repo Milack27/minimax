@@ -23,8 +23,8 @@ pub enum Place {
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum Player {
-    One,
-    Two,
+    X,
+    O,
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
@@ -55,8 +55,8 @@ pub enum MoveError {
 impl Player {
     fn other(self) -> Player {
         match self {
-            Player::One => Player::Two,
-            Player::Two => Player::One,
+            Player::X => Player::O,
+            Player::O => Player::X,
         }
     }
 }
@@ -88,7 +88,7 @@ impl GameResult {
 impl TicTacToe {
     pub fn new() -> TicTacToe {
         TicTacToe {
-            status: Status::Running(Player::One),
+            status: Status::Running(Player::X),
             grid: [None; GRID_SIZE],
         }
     }

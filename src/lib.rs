@@ -23,7 +23,28 @@ pub enum Status {
     Finished(GameResult),
 }
 
-pub trait GameState: Clone {
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+pub enum Outcome {
+    Definite(GameResult, usize),
+    Indefinite(isize),
+}
+
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct Minimax<S: GameState> {
+    pub outcome: Outcome,
+    pub moves: Vec<S::Move>,
+}
+
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+pub enum MinimaxError<S: GameState> {
+    GameAlreadyFinished,
+    MoveError(S::MoveError),
+    NoPossibleMoves,
+}
+
+pub type MinimaxResult<S> = Result<Minimax<S>, MinimaxError<S>>;
+
+pub trait GameState: Clone + PartialEq {
     type Move: Eq + Hash;
     type MoveError;
 
@@ -35,22 +56,58 @@ pub trait GameState: Clone {
         0
     }
 
-    fn minimax(&self, depth: usize) -> Result<Vec<Self::Move>, MinimaxError<Self>> {
-        Ok(minimax(self, depth)?.1)
+    fn minimax(&self, depth: usize) -> MinimaxResult<Self> {
+        let player = match self.get_status() {
+            Running(player) => player,
+            Finished(_) => return Err(MinimaxError::GameAlreadyFinished),
+        };
+
+        let outcomes = self
+            .possible_moves()
+            .into_iter()
+            .map(|mov| {
+                let mut child_state = self.clone();
+
+                child_state
+                    .make_move(&mov)
+                    .map_err(MinimaxError::MoveError)?;
+
+                let outcome = match child_state.get_status() {
+                    Status::Finished(result) => Definite(result, 0),
+                    Status::Running(_) if depth == 0 => Indefinite(child_state.get_score()),
+                    _ => {
+                        let child_outcome = child_state.minimax(depth - 1)?.outcome;
+
+                        match child_outcome {
+                            Definite(result, moves) => Definite(result, moves + 1),
+                            _ => child_outcome,
+                        }
+                    }
+                };
+
+                Ok((mov, outcome))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+
+        let best_outcome = outcomes
+            .iter()
+            .max_by(|(_lhs_move, lhs_outcome), (_rhs_move, rhs_outcome)| {
+                compare_outcome(player, lhs_outcome, rhs_outcome)
+            })
+            .ok_or(MinimaxError::NoPossibleMoves)?
+            .1;
+
+        let moves = outcomes
+            .into_iter()
+            .filter(|(_mov, outcome)| *outcome == best_outcome)
+            .map(|(mov, _outcome)| mov)
+            .collect();
+
+        Ok(Minimax {
+            outcome: best_outcome,
+            moves,
+        })
     }
-}
-
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub enum MinimaxError<S: GameState> {
-    GameAlreadyFinished,
-    MoveError(S::MoveError),
-    NoPossibleMoves,
-}
-
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-enum Outcome {
-    Definite(GameResult, usize),
-    Indefinite(isize),
 }
 
 impl Player {
@@ -102,55 +159,4 @@ fn compare_outcome(player: Player, lhs: &Outcome, rhs: &Outcome) -> Ordering {
         }
         _ => compare_outcome(player, rhs, lhs).reverse(),
     }
-}
-
-fn minimax<S: GameState>(
-    state: &S,
-    depth: usize,
-) -> Result<(Outcome, Vec<S::Move>), MinimaxError<S>> {
-    let player = match state.get_status() {
-        Running(player) => player,
-        Finished(_) => return Err(MinimaxError::GameAlreadyFinished),
-    };
-
-    let outcomes = state
-        .possible_moves()
-        .into_iter()
-        .map(|mov| {
-            let mut child_state = state.clone();
-
-            child_state
-                .make_move(&mov)
-                .map_err(MinimaxError::MoveError)?;
-
-            let outcome = match child_state.get_status() {
-                Status::Finished(result) => Definite(result, 0),
-                Status::Running(_) if depth == 0 => Indefinite(child_state.get_score()),
-                _ => {
-                    let child_outcome = minimax(&child_state, depth - 1)?.0;
-
-                    match child_outcome {
-                        Definite(result, moves) => Definite(result, moves + 1),
-                        _ => child_outcome,
-                    }
-                }
-            };
-
-            Ok((mov, outcome))
-        })
-        .collect::<Result<Vec<_>, MinimaxError<_>>>()?;
-
-    let best_outcome = outcomes
-        .iter()
-        .max_by(|(_, l), (_, r)| compare_outcome(player, l, r))
-        .ok_or(MinimaxError::NoPossibleMoves)?
-        .1;
-
-    let moves = outcomes
-        .into_iter()
-        .filter(|(_mov, outcome)| *outcome == best_outcome)
-        .map(|(mov, _outcome)| mov)
-        .collect();
-
-    Ok((best_outcome, moves))
 }

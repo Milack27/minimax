@@ -7,8 +7,8 @@ use ::minimax::{
 impl From<Player> for MinimaxPlayer {
     fn from(player: Player) -> MinimaxPlayer {
         match player {
-            Player::One => MinimaxPlayer::One,
-            Player::Two => MinimaxPlayer::Two,
+            Player::X => MinimaxPlayer::One,
+            Player::O => MinimaxPlayer::Two,
         }
     }
 }
@@ -16,8 +16,8 @@ impl From<Player> for MinimaxPlayer {
 impl From<MinimaxPlayer> for Player {
     fn from(player: MinimaxPlayer) -> Player {
         match player {
-            MinimaxPlayer::One => Player::One,
-            MinimaxPlayer::Two => Player::Two,
+            MinimaxPlayer::One => Player::X,
+            MinimaxPlayer::Two => Player::O,
         }
     }
 }

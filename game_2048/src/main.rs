@@ -1,4 +1,4 @@
-use ::minimax::{GameState, MinimaxError};
+use ::minimax::{GameState, MinimaxResult};
 
 use std::io;
 
@@ -47,20 +47,23 @@ fn print_instructions() {
     println!();
 }
 
-fn print_minimax(game: &Game2048) -> Result<(), MinimaxError<Game2048>> {
+fn print_minimax(game: &Game2048) -> MinimaxResult<Game2048> {
     const MINIMAX_DEPTH: usize = 5;
 
-    println!("Minimax:");
+    print!("Minimax: ");
 
-    let moves = match game.minimax(MINIMAX_DEPTH) {
-        Ok(moves) => moves,
+    let minimax = match game.minimax(MINIMAX_DEPTH) {
+        Ok(minimax) => {
+            println!("{:?}", minimax.outcome);
+            minimax
+        }
         Err(error) => {
             println!("{:?}\n", error);
             return Err(error);
         }
     };
 
-    for mov in moves {
+    for mov in minimax.moves.iter() {
         match mov {
             Move::Human(Up) => println!("W"),
             Move::Human(Left) => println!("A"),
@@ -94,7 +97,7 @@ fn print_minimax(game: &Game2048) -> Result<(), MinimaxError<Game2048>> {
     }
 
     println!();
-    Ok(())
+    Ok(minimax)
 }
 
 fn handle_human_turn(game: &mut Game2048, input: String) -> Result<(), Game2048Error> {

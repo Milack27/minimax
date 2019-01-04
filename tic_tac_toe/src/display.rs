@@ -5,8 +5,8 @@ use std::fmt;
 fn get_char(player: Option<Player>) -> char {
     match player {
         None => ' ',
-        Some(Player::One) => 'X',
-        Some(Player::Two) => 'O',
+        Some(Player::X) => 'X',
+        Some(Player::O) => 'O',
     }
 }
 

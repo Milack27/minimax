@@ -1,4 +1,4 @@
-use ::minimax::{GameState, MinimaxError};
+use ::minimax::{GameState, MinimaxResult};
 
 use std::io;
 
@@ -35,20 +35,23 @@ fn print_instructions() {
     println!();
 }
 
-fn print_minimax(game: &TicTacToe) -> Result<(), MinimaxError<TicTacToe>> {
-    const MINIMAX_DEPTH: usize = 5;
+fn print_minimax(game: &TicTacToe) -> MinimaxResult<TicTacToe> {
+    const MINIMAX_DEPTH: usize = 8;
 
     print!("Minimax: ");
 
-    let places = match game.minimax(MINIMAX_DEPTH) {
-        Ok(places) => places,
+    let minimax = match game.minimax(MINIMAX_DEPTH) {
+        Ok(minimax) => {
+            println!("{:?}", minimax.outcome);
+            minimax
+        }
         Err(error) => {
             println!("{:?}\n", error);
             return Err(error);
         }
     };
 
-    for (i, place) in places.iter().enumerate() {
+    for (i, place) in minimax.moves.iter().enumerate() {
         print!(
             "{}",
             match place {
@@ -64,13 +67,13 @@ fn print_minimax(game: &TicTacToe) -> Result<(), MinimaxError<TicTacToe>> {
             }
         );
 
-        if i < places.len() {
+        if i < minimax.moves.len() {
             print!(", ");
         }
     }
 
     println!("\n");
-    Ok(())
+    Ok(minimax)
 }
 
 fn parse_input(input: String) -> Result<Place, TicTacToeError> {
@@ -148,8 +151,7 @@ fn main() {
             Finished(result) => {
                 match result {
                     Draw => println!("Draw."),
-                    Win(Player::One) => println!("X wins."),
-                    Win(Player::Two) => println!("O wins."),
+                    Win(player) => println!("{} wins.", player),
                 }
 
                 break;
