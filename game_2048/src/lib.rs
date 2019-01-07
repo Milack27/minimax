@@ -73,6 +73,12 @@ impl Place {
     pub fn get_xy(self) -> (usize, usize) {
         (self.0 % GRID_WIDTH, self.0 / GRID_WIDTH)
     }
+
+    pub fn values() -> impl Iterator<Item = Place> {
+        (0..GRID_WIDTH)
+            .zip(0..GRID_HEIGHT)
+            .map(|(x, y)| Place::from_xy(x, y).expect("Invalid place."))
+    }
 }
 
 impl Player {
