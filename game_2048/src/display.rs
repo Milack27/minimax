@@ -72,7 +72,7 @@ impl fmt::Display for Game2048 {
             print_line(f, max_digits, values, '|')?;
 
             if y < GRID_HEIGHT - 1 {
-                print_markers(f, max_digits, GRID_WIDTH, '|', '+', ' ')?;
+                print_markers(f, max_digits, GRID_WIDTH, '+', '+', ' ')?;
             }
         }
 
